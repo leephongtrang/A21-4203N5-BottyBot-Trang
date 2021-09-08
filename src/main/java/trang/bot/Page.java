@@ -2,11 +2,11 @@ package trang.bot;
 
 
 public class Page {
-    public String Url;
+    public String URL;
     public int Profondeur;
 
     public Page(String pURL, int pProfondeur){
-        Url = pURL;
+        URL = pURL;
         Profondeur = pProfondeur;
     }
 }

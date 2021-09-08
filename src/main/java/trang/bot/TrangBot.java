@@ -5,10 +5,12 @@ import org.jsoup.nodes.Document;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrangBot {
-    public static void main(String[] args) {
 
+    public static void main(String[] args) {
         //Paramètre pour debug
         {
             args = new String[3];
@@ -17,39 +19,68 @@ public class TrangBot {
             args[2] = "C:\\Users\\2031296\\Desktop\\Nouveau dossier";
         }
 
-        ValideNbParam(args);
-        ValideParam(args);
-        Exploration(args);
+
+        Page PageDeBase = new Page(args[1], Integer.parseInt(args[0]));
+        Validation(args);
+
+        ArrayList<Page> m_PageAExplorer = new ArrayList<Page>();
+        ArrayList<Page> m_PageDejaFait = new ArrayList<Page>();
+        m_PageAExplorer.add(PageDeBase);
+
+        if (!m_PageAExplorer.isEmpty()){
+
+        }
+    }
+
+
+
+    public static void EcrireFichier(Page pPage){
+        throw new UnsupportedOperationException();
+    }
+
+    public static void ExtraireCouriels(Page pPage){
+        throw new UnsupportedOperationException();
+    }
+
+    public static void ExtraireLiens(Page pPage){
+        throw new UnsupportedOperationException();
+    }
+
+    public static void SauvegardePageExplorer(Page pPage){
+
+    }
+
+    public static void Validation(String[] tabl){
+        ValideNbParam(tabl);
+        ValideParam(tabl);
     }
     public static void ValideNbParam(String[] tabl){
         if (tabl.length != 3) {
             System.out.println(
-                "Le nombre de paramètres donnés n'est pas correct.\n" +
-                "Il faut 3 paramètres :\n" +
-                "-La profondeurs d'exploration et doit être une nombre supérieur à 0.\n" +
-                "-Un URL de départ valide.\n" +
-                "-Un répertoire pour sauvegarder les pages téléchargées.");
+                    "Le nombre de paramètres donnés n'est pas correct.\n" +
+                            "Il faut 3 paramètres :\n" +
+                            "-La profondeurs d'exploration et doit être une nombre supérieur à 0.\n" +
+                            "-Un URL de départ valide.\n" +
+                            "-Un répertoire pour sauvegarder les pages téléchargées.");
             System.exit(0);
         }
     }
-
     public static void ValideParam(String[] tabl){
         //Assignation des valeurs
-        int Profondeur = Integer.parseInt(tabl[0]);
-        String URL = tabl[1];
+        Page page = new Page(tabl[1], Integer.parseInt(tabl[0]));
         File Dossier = new File(tabl[2]);
 
         //Check la profondeur//
-        if (Profondeur < 0){
+        if (page.Profondeur < 0){
             System.out.println(
-                "Le paramètre 1 contient un nombre invalide, il faut un entier positif égal ou supérieur à 0."
+                    "Le paramètre 1 contient un nombre invalide, il faut un entier positif égal ou supérieur à 0."
             );
         }
 
         //Check l'URL
         {
             try {
-                Jsoup.connect(URL).get();
+                Jsoup.connect(page.URL).get();
             } catch (IllegalArgumentException a) {
                 System.out.println("Le paramètre 2, l'URL n'est pas valide.");
             } catch (IOException e) {
@@ -68,30 +99,5 @@ public class TrangBot {
             System.out.println("Le paramètre 3, l'emplacement n'est pas valide, il n'est pas accessible ou il est impossible d'écrire dedans.");
         }
     }
-
-    public static void Exploration(String[] pParam){
-        /*
-        File Dossier = new File(pParam[2]);
-
-        Document Html = null;
-        try {
-            Html = Jsoup.connect(pParam[1]).get();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String NomHtml = Html.title();
-        String TextHtml = Html.outerHtml();
-
-        FileWriter FischierHtml = null;
-        try {
-            FischierHtml = new FileWriter(Dossier + "\\" + NomHtml + ".txt");
-            FischierHtml.write(TextHtml);
-            FischierHtml.close();
-        } catch (IOException e) {
-            e.printStackTrace();*/
-
-
-        Page PageAExplorer = new Page(pParam[1], Integer.parseInt(pParam[0]));
-    }
 }
+
