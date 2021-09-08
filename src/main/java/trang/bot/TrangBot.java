@@ -8,6 +8,7 @@ import java.io.IOException;
 
 public class TrangBot {
     public static void main(String[] args) {
+
         //Paramètre pour debug
         {
             args = new String[3];
@@ -69,6 +70,7 @@ public class TrangBot {
     }
 
     public static void Exploration(String[] pParam){
+        /*
         File Dossier = new File(pParam[2]);
 
         Document Html = null;
@@ -87,7 +89,9 @@ public class TrangBot {
             FischierHtml.write(TextHtml);
             FischierHtml.close();
         } catch (IOException e) {
-            e.printStackTrace();
-        }
+            e.printStackTrace();*/
+
+
+        Page PageAExplorer = new Page(pParam[1], Integer.parseInt(pParam[0]));
     }
 }
