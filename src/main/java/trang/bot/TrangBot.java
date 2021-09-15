@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,35 +15,38 @@ import java.util.List;
 public class TrangBot {
     static ArrayList<Page> m_PageAExplorer = new ArrayList<Page>();
     static ArrayList<Page> m_PageDejaFait = new ArrayList<Page>();
+    static int PageExplorer = 0;
     public static void main(String[] args) {
         //Paramètre pour debug
         {
             args = new String[3];
-            args[0] = "0";
-            args[1] = "https://www.google.com/search?q=href&rlz=1C1GCEB_enCA971&oq=href&aqs=chrome..69i57j0i512l9.671j0j7&sourceid=chrome&ie=UTF-8";
+            args[0] = "2";
+            args[1] = "https://departement-info-cem.github.io/3N5-Prog3/testbot/";
             args[2] = "C:\\Users\\2031296\\Desktop";
         }
 
-
         Page PageDeBase = new Page(args[1], Integer.parseInt(args[0]));
         Validation(args);
-
+        AfficherDebut(args[2]);
 
         m_PageAExplorer.add(PageDeBase);
 
-        try {
+        while (!m_PageAExplorer.isEmpty()){
             ExtraireLiens(m_PageAExplorer.get(0));
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
-        if (!m_PageAExplorer.isEmpty()){
-
-        }
-
     }
 
+    public static void AfficherMessageExploration(Page pPage){
+        System.out.println("Exploration de >> " + pPage.URL);
+    }
 
+    public static void AfficherDebut(String pPath){
+        System.out.println("Bonjour" + "\n\n" + "Tout va bien, explorons");
+    }
+
+    public static void AfficherCouriel(){
+
+    }
 
     public static void EcrireFichier(Page pPage){
         throw new UnsupportedOperationException();
@@ -52,32 +56,46 @@ public class TrangBot {
         throw new UnsupportedOperationException();
     }
 
-    public static void ExtraireLiens(Page pPage) throws IOException {
-        Document doc = Jsoup.connect(pPage.URL).get();
-
-        //Element link = doc.select("a").first();
-        //String relHref = link.attr("href"); // == "/"
-        //String absHref = link.attr("abs:href"); // "http://jsoup.org/"
-
-        //Get links from document object.
-        Elements links = doc.select("a[href]");
-        //Iterate links and print link attributes.
-        for (Element link : links) {
-            System.out.println("Link: " + link.attr("abs:href"));
+    //A CUSTOM LA REPONSE ERREUR
+    public static void ExtraireLiens(Page pPage) {
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(pPage.URL).get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException i) {
+            System.out.println("Url mal formée " + pPage.URL);
+            SauvegardePageExplorer(pPage);
         }
 
+        AfficherMessageExploration(m_PageAExplorer.get(0));
 
+        if (pPage.Profondeur > 0){
+            Elements links = doc.select("a[href]");
+            for (Element link : links) {
+                String Url = link.attr("abs:href");
+                AjoutPageAExplorer(Url, pPage);
+                //System.out.println("Link: " + Url);
+            }
+        }
+        SauvegardePageExplorer(pPage);
     }
 
-    public static void AjoutPageAExplorer(String pURL, int pProfondeurAMettre){
-        Page page = new Page(pURL, pProfondeurAMettre);
-        for (Page euh : m_PageDejaFait){
-            if (!euh.URL.equals(page.URL)){
+    public static void AjoutPageAExplorer(String pURL, Page pPagePrecedent){
+        if (pPagePrecedent.Profondeur != 0){
+            Page page = new Page(pURL, pPagePrecedent.Profondeur-1);
+            if (m_PageDejaFait.isEmpty()){
                 m_PageAExplorer.add(page);
+            }
+            else {
+                for (Page euh : m_PageDejaFait){
+                    if (!euh.URL.equals(page.URL) | euh.URL == null){
+                        m_PageAExplorer.add(page);
+                    }
+                }
             }
         }
     }
-
     public static void SauvegardePageExplorer(Page pPage){
         m_PageDejaFait.add(pPage);
         m_PageAExplorer.remove(pPage);
@@ -92,9 +110,9 @@ public class TrangBot {
             System.out.println(
                     "Le nombre de paramètres donnés n'est pas correct.\n" +
                             "Il faut 3 paramètres :\n" +
-                            "-La profondeurs d'exploration et doit être une nombre supérieur à 0.\n" +
-                            "-Un URL de départ valide.\n" +
-                            "-Un répertoire pour sauvegarder les pages téléchargées.");
+                            "-La profondeur d'exploration doit être un nombre entier positif.\n" +
+                            "-L' URL de départ doit être valide.\n" +
+                            "-Le répertoire où écrire les copies locales des fichiers explorés, le dossier doit être accessible et on doit pouvoir y écrire.");
             System.exit(0);
         }
     }
