@@ -2,6 +2,9 @@ package trang.bot;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,27 +12,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TrangBot {
-
+    static ArrayList<Page> m_PageAExplorer = new ArrayList<Page>();
+    static ArrayList<Page> m_PageDejaFait = new ArrayList<Page>();
     public static void main(String[] args) {
         //Paramètre pour debug
         {
             args = new String[3];
             args[0] = "0";
-            args[1] = "https://jsoup.org/cookbook/input/load-document-from-url";
-            args[2] = "C:\\Users\\2031296\\Desktop\\Nouveau dossier";
+            args[1] = "https://www.google.com/search?q=href&rlz=1C1GCEB_enCA971&oq=href&aqs=chrome..69i57j0i512l9.671j0j7&sourceid=chrome&ie=UTF-8";
+            args[2] = "C:\\Users\\2031296\\Desktop";
         }
 
 
         Page PageDeBase = new Page(args[1], Integer.parseInt(args[0]));
         Validation(args);
 
-        ArrayList<Page> m_PageAExplorer = new ArrayList<Page>();
-        ArrayList<Page> m_PageDejaFait = new ArrayList<Page>();
+
         m_PageAExplorer.add(PageDeBase);
+
+        try {
+            ExtraireLiens(m_PageAExplorer.get(0));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         if (!m_PageAExplorer.isEmpty()){
 
         }
+
     }
 
 
@@ -42,12 +52,35 @@ public class TrangBot {
         throw new UnsupportedOperationException();
     }
 
-    public static void ExtraireLiens(Page pPage){
-        throw new UnsupportedOperationException();
+    public static void ExtraireLiens(Page pPage) throws IOException {
+        Document doc = Jsoup.connect(pPage.URL).get();
+
+        //Element link = doc.select("a").first();
+        //String relHref = link.attr("href"); // == "/"
+        //String absHref = link.attr("abs:href"); // "http://jsoup.org/"
+
+        //Get links from document object.
+        Elements links = doc.select("a[href]");
+        //Iterate links and print link attributes.
+        for (Element link : links) {
+            System.out.println("Link: " + link.attr("abs:href"));
+        }
+
+
+    }
+
+    public static void AjoutPageAExplorer(String pURL, int pProfondeurAMettre){
+        Page page = new Page(pURL, pProfondeurAMettre);
+        for (Page euh : m_PageDejaFait){
+            if (!euh.URL.equals(page.URL)){
+                m_PageAExplorer.add(page);
+            }
+        }
     }
 
     public static void SauvegardePageExplorer(Page pPage){
-
+        m_PageDejaFait.add(pPage);
+        m_PageAExplorer.remove(pPage);
     }
 
     public static void Validation(String[] tabl){
@@ -76,7 +109,6 @@ public class TrangBot {
                     "Le paramètre 1 contient un nombre invalide, il faut un entier positif égal ou supérieur à 0."
             );
         }
-
         //Check l'URL
         {
             try {
@@ -87,7 +119,6 @@ public class TrangBot {
                 e.printStackTrace();
             }
         }
-
         //Check le dossier
         try {
             FileWriter Yo = new FileWriter(Dossier + "\\capoute.txt");
