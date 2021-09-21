@@ -4,60 +4,81 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TrangBot {
-    static ArrayList<Page> m_PageAExplorer = new ArrayList<Page>();
-    static ArrayList<Page> m_PageDejaFait = new ArrayList<Page>();
+    static ArrayList<Page> m_PageAExplorer = new ArrayList<>();
+    static ArrayList<Page> m_PageDejaFait = new ArrayList<>();
+    static Set<String> m_Email = new HashSet<>();
     static int PageExplorer = 0;
     public static void main(String[] args) {
         //Paramètre pour debug
         {
             args = new String[3];
-            args[0] = "2";
+            args[0] = "1";
             args[1] = "https://departement-info-cem.github.io/3N5-Prog3/testbot/";
             args[2] = "C:\\Users\\2031296\\Desktop";
         }
 
         Page PageDeBase = new Page(args[1], Integer.parseInt(args[0]));
         Validation(args);
-        AfficherDebut(args[2]);
+        AfficherDebut();
 
         m_PageAExplorer.add(PageDeBase);
 
         while (!m_PageAExplorer.isEmpty()){
-            ExtraireLiens(m_PageAExplorer.get(0));
+            try {
+                ExtraireLiens(m_PageAExplorer.get(0));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        AfficherMessageFin();
+        AfficherCouriel();
     }
 
     public static void AfficherMessageExploration(Page pPage){
         System.out.println("Exploration de >> " + pPage.URL);
     }
 
-    public static void AfficherDebut(String pPath){
+    public static void AfficherDebut(){
         System.out.println("Bonjour" + "\n\n" + "Tout va bien, explorons");
     }
 
-    public static void AfficherCouriel(){
+    public static void AfficherMessageFin(){
+        System.out.println("\nNombre de pages explorées : " + PageExplorer);
+    }
 
+    public static void AfficherCouriel(){
+        List<String> e = new ArrayList<>(m_Email);
+        Collections.sort(e);
+        System.out.println("Nombre de courriels extrait (en ordre alphabétique) : " + m_Email.size());
+        for (String s : e) {
+            System.out.println("\t"+ s);
+        }
+    }
+    public static void ExtraireCouriels(Page page) throws IOException {
+        Document doc = Jsoup.connect(page.URL).get();
+
+        Pattern p = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+");
+        Matcher matcher = p.matcher(doc.text());
+        while (matcher.find()) {
+            m_Email.add(matcher.group());
+        }
     }
 
     public static void EcrireFichier(Page pPage){
         throw new UnsupportedOperationException();
     }
 
-    public static void ExtraireCouriels(Page pPage){
-        throw new UnsupportedOperationException();
-    }
-
     //A CUSTOM LA REPONSE ERREUR
-    public static void ExtraireLiens(Page pPage) {
+    public static void ExtraireLiens(Page pPage) throws IOException {
         Document doc = null;
         try {
             doc = Jsoup.connect(pPage.URL).get();
@@ -67,7 +88,8 @@ public class TrangBot {
             System.out.println("Url mal formée " + pPage.URL);
             SauvegardePageExplorer(pPage);
         }
-
+        PageExplorer++;
+        ExtraireCouriels(pPage);
         AfficherMessageExploration(m_PageAExplorer.get(0));
 
         if (pPage.Profondeur > 0){
@@ -145,7 +167,7 @@ public class TrangBot {
             File Degage = new File(Dossier + "\\capoute.txt");
             Degage.delete();
         } catch (IOException e) {
-            System.out.println("Le paramètre 3, l'emplacement n'est pas valide, il n'est pas accessible ou il est impossible d'écrire dedans.");
+            System.out.println("Le paramètre 3, l'emplacement n'est pas valide, il est inaccessible ou il est impossible d'écrire dedans.");
         }
     }
 }
