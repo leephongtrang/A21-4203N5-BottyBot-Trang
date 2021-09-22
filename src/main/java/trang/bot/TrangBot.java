@@ -8,6 +8,8 @@ import org.jsoup.select.Elements;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,18 +19,22 @@ public class TrangBot {
     static ArrayList<Page> m_PageDejaFait = new ArrayList<>();
     static Set<String> m_Email = new HashSet<>();
     static int PageExplorer = 0;
+    static String Path = "";
+
     public static void main(String[] args) {
         //Paramètre pour debug
         {
             args = new String[3];
             args[0] = "1";
-            args[1] = "https://departement-info-cem.github.io/3N5-Prog3/testbot/";
+            args[1] = "https://departement-info-cem.github.io/3N5-Prog3/testbot/index.html";
             args[2] = "C:\\Users\\2031296\\Desktop";
         }
 
         Page PageDeBase = new Page(args[1], Integer.parseInt(args[0]));
-        Validation(args);
+        Path = args[1];
+
         AfficherDebut();
+        Validation(args);
 
         m_PageAExplorer.add(PageDeBase);
 
@@ -46,11 +52,9 @@ public class TrangBot {
     public static void AfficherMessageExploration(Page pPage){
         System.out.println("Exploration de >> " + pPage.URL);
     }
-
     public static void AfficherDebut(){
-        System.out.println("Bonjour" + "\n\n" + "Tout va bien, explorons");
+        System.out.println("Bonjour le correcteur ?" + "\n\n" + "Tout va bien, explorons");
     }
-
     public static void AfficherMessageFin(){
         System.out.println("\nNombre de pages explorées : " + PageExplorer);
     }
@@ -73,8 +77,28 @@ public class TrangBot {
         }
     }
 
-    public static void EcrireFichier(Page pPage){
-        throw new UnsupportedOperationException();
+    public static void SauvegardeFichier(Page pPage) throws IOException {
+        Document doc = Jsoup.connect(pPage.URL).get();
+        Elements links = doc.select("a[href]");
+
+        //https://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls
+
+
+
+        //Pattern p = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+");
+        //Matcher matcher = p.matcher(doc.text());
+        //while (matcher.find()) {
+
+        //    m_Email.add(matcher.group());
+        //}
+        //String master = doc.html();
+        //String target = String.valueOf(matcher);
+        //String replacement = "2031296@cegepmontpetit.ca";
+        //String processed = master.replace(target, replacement);
+
+        FileWriter file = new FileWriter( Path + "\\" + links.attr(":href"));
+        file.write(doc.html());
+        file.close();
     }
 
     //A CUSTOM LA REPONSE ERREUR
@@ -91,6 +115,8 @@ public class TrangBot {
         PageExplorer++;
         ExtraireCouriels(pPage);
         AfficherMessageExploration(m_PageAExplorer.get(0));
+
+        SauvegardeFichier(pPage);
 
         if (pPage.Profondeur > 0){
             Elements links = doc.select("a[href]");
