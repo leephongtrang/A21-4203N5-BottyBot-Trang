@@ -16,18 +16,15 @@ import org.jsoup.select.Elements;
 
 public class Test {
     public static void main (String [] args) throws IOException {
+        String Path = "C:\\Users\\Lee Phong\\Desktop\\A21-4203N5-BottyBot-Trang";
         Document doc = Jsoup.connect("https://departement-info-cem.github.io/3N5-Prog3/testbot/index.html").get();
 
-        Elements links = doc.select("a[href]");
-        String fileName = links.attr("href");
-        //FileWriter file = new FileWriter( "C:\\Users\\2031296\\Desktop\\" + fileName);
-        //file.write(doc.html());
-        //file.close();
-        Path pathAbsolute = Paths.get("https://departement-info-cem.github.io/3N5-Prog3/testbot/index.html");
-        Path pathBase = Paths.get("https://departement-info-cem.github.io/3N5-Prog3/testbot/index.html");
-        Path pathRelative = pathBase.relativize(pathAbsolute);
-        System.out.println(pathRelative);
+        String path = "https://departement-info-cem.github.io/3N5-Prog3/testbot/index.html";
+        String base = "https://departement-info-cem.github.io/3N5-Prog3/testbot/";
+        String relative = new File(base).toURI().relativize(new File(path).toURI()).getPath();
 
-
+        FileWriter file = new FileWriter( Path + "\\" + relative);
+        file.write(doc.html());
+        file.close();
     }
 }

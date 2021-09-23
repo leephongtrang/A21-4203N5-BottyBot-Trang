@@ -5,12 +5,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.awt.*;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,22 +18,23 @@ public class TrangBot {
     static ArrayList<Page> m_PageDejaFait = new ArrayList<>();
     static Set<String> m_Email = new HashSet<>();
     static int PageExplorer = 0;
-    static String Path = "";
+    static String m_Path = "";
 
     public static void main(String[] args) {
         //Paramètre pour debug
         {
             args = new String[3];
-            args[0] = "1";
+            args[0] = "2";
             args[1] = "https://departement-info-cem.github.io/3N5-Prog3/testbot/index.html";
-            args[2] = "C:\\Users\\2031296\\Desktop";
+            args[2] = "C:\\Users\\Lee Phong\\Desktop\\A21-4203N5-BottyBot-Trang";
         }
 
         Page PageDeBase = new Page(args[1], Integer.parseInt(args[0]));
-        Path = args[1];
+        m_Path = args[2];
 
         AfficherDebut();
         Validation(args);
+        AfficherMessageDebutExplo();
 
         m_PageAExplorer.add(PageDeBase);
 
@@ -53,7 +53,10 @@ public class TrangBot {
         System.out.println("Exploration de >> " + pPage.URL);
     }
     public static void AfficherDebut(){
-        System.out.println("Bonjour le correcteur ?" + "\n\n" + "Tout va bien, explorons");
+        System.out.println("Bonjour le correcteur ?\n");
+    }
+    public static void AfficherMessageDebutExplo(){
+        System.out.println("Tout va bien, explorons");
     }
     public static void AfficherMessageFin(){
         System.out.println("\nNombre de pages explorées : " + PageExplorer);
@@ -78,27 +81,26 @@ public class TrangBot {
     }
 
     public static void SauvegardeFichier(Page pPage) throws IOException {
+        String Path = m_Path;
         Document doc = Jsoup.connect(pPage.URL).get();
-        Elements links = doc.select("a[href]");
 
-        //https://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls
-
-
+        String path = pPage.URL;
+        String base = "https://departement-info-cem.github.io/3N5-Prog3/testbot/";
+        String relative = new File(base).toURI().relativize(new File(path).toURI()).getPath();
 
         //Pattern p = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+");
         //Matcher matcher = p.matcher(doc.text());
         //while (matcher.find()) {
-
         //    m_Email.add(matcher.group());
         //}
-        //String master = doc.html();
-        //String target = String.valueOf(matcher);
-        //String replacement = "2031296@cegepmontpetit.ca";
-        //String processed = master.replace(target, replacement);
 
-        FileWriter file = new FileWriter( Path + "\\" + links.attr(":href"));
-        file.write(doc.html());
-        file.close();
+        try {
+            FileWriter file = new FileWriter( m_Path + "\\" + relative);
+            file.write(doc.html());
+            file.close();
+        } catch (FileNotFoundException fileNotFoundException){
+
+        }
     }
 
     //A CUSTOM LA REPONSE ERREUR
@@ -171,9 +173,8 @@ public class TrangBot {
 
         //Check la profondeur//
         if (page.Profondeur < 0){
-            System.out.println(
-                    "Le paramètre 1 contient un nombre invalide, il faut un entier positif égal ou supérieur à 0."
-            );
+            System.out.println("Le paramètre 1 contient un nombre invalide, il faut un entier positif égal ou supérieur à 0.");
+            System.exit(0);
         }
         //Check l'URL
         {
@@ -181,6 +182,7 @@ public class TrangBot {
                 Jsoup.connect(page.URL).get();
             } catch (IllegalArgumentException a) {
                 System.out.println("Le paramètre 2, l'URL n'est pas valide.");
+                System.exit(0);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -194,6 +196,7 @@ public class TrangBot {
             Degage.delete();
         } catch (IOException e) {
             System.out.println("Le paramètre 3, l'emplacement n'est pas valide, il est inaccessible ou il est impossible d'écrire dedans.");
+            System.exit(0);
         }
     }
 }
